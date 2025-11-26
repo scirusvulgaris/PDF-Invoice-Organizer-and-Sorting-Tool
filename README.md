@@ -1,61 +1,276 @@
-# PDF Processing and Date Extraction Tool
+# PDF Invoice Organizer 📄
 
-This advanced tool streamlines the management of PDF documents by automatically extracting dates and keywords to organize files efficiently, eliminating the need for manual triaging. It leverages Optical Character Recognition (OCR) technology to read text from PDF files—even those that are image-based—ensuring that no document is overlooked due to its format. The tool intelligently sorts documents into directories based on the year and month extracted from their content, creating an organized archive without manual intervention.
+Automatically sorts PDF invoices(facture) by date into organized folder structures with OCR support for scanned documents.
 
-Key features include:
-- **Advanced Date Extraction**: Utilizes both text analysis and OCR to find dates within PDF documents, supporting a wide array of date formats including those with French month names. This ensures accurate sorting even in documents with dates in natural language or varied formats.
-- **Keyword-Based Filtering**: Scans documents for specified keywords to identify relevant documents. This feature supports both inclusion and exclusion lists, allowing for precise control over which documents are considered significant.
-- **Automated File Organization**: Automatically sorts documents into folders based on the extracted dates, arranging them by year and month for easy retrieval. This process is fully automated, drastically reducing the time and effort required for file management.
-- **Versatile Document Handling**: Capable of processing both text-based and image-based PDFs thanks to integrated OCR technology, ensuring comprehensive coverage across all types of documents.
+## ✨ Features
 
-This tool is designed to significantly reduce the manual workload associated with invoice sorting, making it an indispensable asset for businesses, researchers, and anyone dealing with large volumes of PDF documents.
+- **Automatic Date Extraction**: Supports multiple date formats (dd/mm/yyyy, dd-mm-yyyy, dd.mm.yyyy, etc.)
+- **OCR Support**: Automatically processes scanned/image-based PDFs using EasyOCR
+- **Multi-language**: Handles English, French, and German invoice keywords
+- **Smart Organization**: Sorts invoices into `YYYY/Facture fournisseur/MM/` structure
+- **Duplicate Handling**: Automatically renames duplicate files
+- **ZIP Extraction**: Automatically extracts ZIP files before processing
+- **Multi-threaded**: Fast processing using concurrent execution
+- **Verbose Mode**: Detailed logging for debugging
+- **Dry Run**: Preview changes without moving files
+- **Statistics**: Comprehensive processing reports
 
-## Dependencies
+## 📋 Requirements
 
-Ensure you have Python 3.x installed on your system. This tool depends on several Python libraries which are listed in the `requirements.txt` file.
+- Python 3.7+
+- PyMuPDF (fitz)
+- easyocr
+- Pillow (PIL)
+- numpy
 
-## Usage
+## 🚀 Installation
 
-1. **Setup**: Place the script in the directory with your PDF files.
-2. **Customization**: Customize the `keywords` list within the main block to match your document processing needs.
-3. **Execution**: Run the script with optional year and keywords arguments.
+1. Clone or download this repository
 
+2. Install required dependencies:
+
+```bash
+pip install PyMuPDF easyocr Pillow numpy
+```
+
+## 📖 Usage
+
+### Basic Usage
+
+Process all PDF invoices in the current directory:
+
+```bash
+python script.py
+```
+
+### Verbose Mode
+
+See detailed processing information:
+
+```bash
+python script.py -v
+```
+
+### Dry Run
+
+Preview what would happen without moving files:
+
+```bash
+python script.py --dry-run -v
+```
+
+### With Statistics
+
+Show detailed statistics after processing:
+
+```bash
+python script.py --stats
+```
+
+### Filter by Year
+
+Process only invoices from a specific year:
+
+```bash
+python script.py 2024
+```
+
+### Custom Keywords
+
+Add custom keywords to search for:
+
+```bash
+python script.py bill receipt nota
+```
+
+### Combined Options
+
+```bash
+python script.py -v --stats 2024 bill receipt
+```
+
+## 📁 Folder Structure
+
+The script organizes invoices into the following structure:
 
 ```
-python pdf_sort.py [year] [additional keywords to be matched]
+Current Directory/
+├── 2023/
+│   └── Facture fournisseur/
+│       ├── 01/  (January invoices)
+│       ├── 02/  (February invoices)
+│       ├── 03/  (March invoices)
+│       └── ...
+├── 2024/
+│   └── Facture fournisseur/
+│       ├── 01/
+│       ├── 02/
+│       └── ...
+├── 2025/
+│   └── Facture fournisseur/
+│       └── ...
+└── commande/  (Non-invoice documents)
 ```
 
-[year] pdfs with given year will be triaged
-Undesired words must be added in the code source directly for now
+## 🔍 Supported Date Formats
 
-## Function Overview
+The script can extract dates in the following formats:
 
-- `extract_month_from_french(text)`: Extracts the month from text with French month names.
-- `extract_date_from_text(text)`: Identifies dates in text using regular expressions.
-- `generate_random_suffix(size, chars)`: Generates a random suffix for filenames.
-- `contains_undesired_keywords(text, specific_keywords)`: Checks for undesired keywords in text.
-- `contains_desired_keywords(text, specific_keywords)`: Checks for desired keywords in text.
-- `process_pdf_file(filepath, year, keywords, unsorted_files)`: Processes a single PDF file, extracting text and/or images, and sorts the file based on the extracted date and keywords.
-- `construct_target_file_path(target_folder_path, filepath)`: Constructs a target file path for moving a processed file.
-- `find_pdf_files(directory, max_depth)`: Searches for PDF files within a specified directory and its subdirectories up to a specified depth.
-- `unzip_files_in_directory(directory)`: Unzips all `.zip` files in a given directory.
-- `delete_empty_folders(directory, max_depth)`: Deletes empty folders within a specified directory and its subdirectories up to a specified depth.
+- **dd/mm/yyyy**: 25/04/2025, 14/02/2025
+- **dd-mm-yyyy**: 25-04-2025, 14-02-2025
+- **dd.mm.yyyy**: 25.04.2025, 14.02.2025
+- **dd/mm/yy**: 25/04/25, 14/02/25
+- **dd-mm-yy**: 25-04-25, 14-02-25
+- **dd.mm.yy**: 25.04.25, 14.02.25
+- **yyyy-mm-dd**: 2025-04-25, 2025-02-14
+- **dd Mon yyyy**: 25 Apr 2025, 14 Feb 2025
+- **French months**: janvier, février, mars, avril, mai, juin, juillet, août, septembre, octobre, novembre, décembre
 
-## System Requirements
+### Date with Time
 
-- **Python 3.x**: Ensure Python 3.x is installed on your system.
-- **RAM**: OCR processing, especially on image-heavy PDF files, can be memory-intensive. We recommend having at least 16 GB of RAM for optimal performance, though more may be required for processing large volumes of documents or very large files.
+The script also handles dates with time components:
+- `25/04/25-14:14:28`
+- `du 14-02-2025 43:52:10`
 
-## Performance Considerations
+## 🏷️ Default Keywords
 
-This tool uses Optical Character Recognition (OCR) to extract text from image-based PDF documents. OCR can be resource-intensive, particularly for documents with a high volume of images or when processing multiple documents simultaneously. Users should be aware that:
+The script searches for these keywords to identify invoices:
 
-- **Memory Usage**: Depending on the size and complexity of the documents, significant amounts of RAM may be consumed. Systems with limited memory may experience slow performance or may fail to process large files.
-- **Processing Time**: OCR and document processing time can vary. Large files or batches of files will take longer to process.
+- **facture** (French)
+- **invoice** (English)
+- **rechnung** (German)
+- **facturation** (French)
+- **repas** (French - meal receipts)
 
-For large-scale processing tasks, consider running the tool on a system with ample memory and processing power to ensure smooth operation. Additionally, closing other memory-intensive applications during the OCR process can help improve performance.
+You can add more keywords via command line arguments.
 
+## ⚙️ Command Line Options
 
-## Note
+| Option | Description |
+|--------|-------------|
+| `-h, --help` | Show help message and exit |
+| `-v, --verbose` | Enable verbose output with detailed processing info |
+| `-d, --dry-run` | Preview actions without moving files |
+| `--version` | Show version information |
+| `--stats` | Show detailed statistics at the end |
 
-The script is versatile and can be adapted for various use cases beyond the provided functionalities. Feel free to modify and extend it as needed to fit your specific requirements.
+## 📊 Example Output
+
+### Normal Mode
+```
+╔═══════════════════════════════════════════════════════════╗
+║           PDF Invoice Organizer v2.0.0                    ║
+║     Automatic invoice sorting with OCR support           ║
+╚═══════════════════════════════════════════════════════════╝
+
+Keywords: facture, invoice, fechnung
+
+Scanning for PDF files...
+
+Found 15 PDF file(s) to process
+
+Starting processing...
+────────────────────────────────────────────────────────────
+
+  ✓ Moved: invoice_2024_01.pdf → 01/2024
+
+Progress: 1/15 (6.7%)
+
+  ✓ Moved: facture_feb.pdf → 02/2024
+
+Progress: 2/15 (13.3%)
+...
+```
+
+### Verbose Mode
+```
+Processing: invoice_2024_01.pdf
+  → Pages: 1
+  → Page 1: Extracted 1250 characters
+  → Found keywords: facture
+  → Extracted date: 01/2024 (from: 15-01-2024)
+  ✓ Moved: invoice_2024_01.pdf → 01/2024
+```
+
+### Statistics Output
+```
+============================================================
+                    PROCESSING SUMMARY
+============================================================
+
+Files Processed:
+  Total PDFs found:        15
+  Successfully sorted:     13
+  Moved to 'commande':     1
+  Could not be sorted:     1
+  Errors encountered:      0
+
+Processing Details:
+  OCR processed files:     3
+  ZIP files extracted:     1
+
+Performance:
+  Total time:              45.23 seconds
+  Average per file:        3.02 seconds
+  Success rate:            86.7%
+
+============================================================
+```
+
+## 🔧 How It Works
+
+1. **ZIP Extraction**: Automatically extracts any ZIP files in the directory
+2. **PDF Scanning**: Finds all PDF files (up to 2 levels deep)
+3. **Text Extraction**: Extracts text from PDFs using PyMuPDF
+4. **OCR Processing**: If no text found, uses EasyOCR on images
+5. **Keyword Detection**: Searches for invoice-related keywords
+6. **Date Extraction**: Extracts dates using regex patterns
+7. **File Organization**: Moves files to appropriate folders
+8. **Cleanup**: Removes empty folders
+
+## 🐛 Troubleshooting
+
+### No date found
+
+If the script can't find a date, run with verbose mode to see what text was extracted:
+
+```bash
+python script.py -v
+```
+
+The verbose output will show:
+```
+→ No date found in text: [first 200 characters of extracted text]
+```
+
+### OCR not working
+
+Make sure EasyOCR is properly installed:
+
+```bash
+pip install --upgrade easyocr
+```
+
+### Files not moving
+
+Use dry-run mode to see what would happen:
+
+```bash
+python script.py --dry-run -v
+```
+
+## 📝 Notes
+
+- The script skips folders named "commande" and year folders (2000-2099) during scanning
+- Duplicate filenames get a random 3-character suffix
+- Empty folders are automatically cleaned up after processing
+- Multi-threaded processing uses all available CPU cores
+- OCR processing is slower but automatic for image-based PDFs
+
+## 🤝 Contributing
+
+Feel free to submit issues, fork the repository, and create pull requests for any improvements.
+
+## 📄 License
+
+This project is open source and available under the MIT License.
