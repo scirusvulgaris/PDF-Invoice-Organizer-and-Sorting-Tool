@@ -30,7 +30,7 @@ Automatically sorts PDF invoices(facture) by date into organized folder structur
 2. Install required dependencies:
 
 ```bash
-pip install PyMuPDF easyocr Pillow numpy
+pip install -r requirements.txt
 ```
 
 ## 📖 Usage
